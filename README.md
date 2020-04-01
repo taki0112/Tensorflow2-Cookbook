@@ -54,7 +54,9 @@ And tell me what you want to implement on the issue. I'll implement it.
 
 ### Common
 * `utils.py` 
-  * image processing
+  * image processing + something useful functions (e.g. automatic_gpu_usage)
+    * `automatic_gpu_usage` : Automatically manage gpu memory
+    * `multiple_gpu_usage` : You can set gpu memory limit
   * from utils import *
 
 ## 2. Network template
