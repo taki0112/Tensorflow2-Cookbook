@@ -6,7 +6,7 @@
 
 
 ## Contributions
-In now, this repo provides **`general architectures`** and **`functions`** that are useful for the GAN and classificstion.
+In now, this repo provides **`general architectures`** and **`functions`** that are useful for the GAN and classification.
 
 I will continue to add useful things to other areas.
 
