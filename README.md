@@ -63,6 +63,9 @@ And tell me what you want to implement on the issue. I'll implement it.
 ### Functional API
 ```python
 from ops_functional import *
+from utils import *
+
+automatic_gpu_usage() # for efficient gpu use
 
 input_shape = [img_height, img_width, img_ch]
 inputs = tf.keras.layers.Input(input_shape, name='input')
@@ -82,6 +85,9 @@ optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
 ### Sequential API
 ```python
 from ops_sequential import *
+from utils import *
+
+automatic_gpu_usage() # for efficient gpu use
 
 model = []
 
