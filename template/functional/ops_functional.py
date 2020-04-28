@@ -1087,6 +1087,33 @@ def vdb_loss(mu, logvar, i_c=0.1):
 
     return loss
 
+def gradient_penalty(discriminator, real_images, fake_images, gan_type='wgan-gp', gamma=10.0):
+    if gan_type.__contains__('dragan'):
+        eps = tf.random.uniform(shape=real_images.shape, minval=0.0, maxval=1.0)
+        _, x_var = tf.nn.moments(real_images, axes=[0, 1, 2, 3])
+        x_std = tf.sqrt(x_var)
+
+        fake_images = real_images + 0.5 * x_std * eps
+
+    alpha = tf.random.uniform([real_images.shape[0], 1, 1, 1], minval=0.0, maxval=1.0)
+
+    interpolated = real_images + alpha * (fake_images - real_images)
+
+    with tf.GradientTape() as tape:
+        tape.watch(interpolated)
+        inter_logit = discriminator(interpolated)
+
+    grad = tape.gradient(inter_logit, interpolated)
+    grad_norm = tf.norm(Flatten(grad), axis=-1)
+
+    if gan_type == 'wgan-lp':
+        gp = tf.reduce_mean(tf.square(tf.maximum(0.0, grad_norm - 1.0))) * gamma
+
+    else :
+        gp = tf.reduce_mean(tf.square(grad_norm - 1.0)) * gamma
+
+    return gp
+
 def gradient_penalty(discriminator, real_images, fake_images, lambda_val=10, gan_type='wgan-gp'):
     assert gan_type in ['wgan-gp', 'wgan-lp', 'dragan']
     if gan_type == 'dragan':
