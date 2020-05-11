@@ -844,52 +844,22 @@ class SrmBlock(tf.keras.layers.Layer):
 # Normalization
 ##################################################################################
 
-class BatchNorm(tf.keras.layers.Layer):
-    def __init__(self, momentum=0.9, epsilon=1e-5, name='BatchNorm'):
-        super(BatchNorm, self).__init__(name=name)
-        self.momentum = momentum
-        self.epsilon = epsilon
+def BatchNorm(momentum=0.9, epsilon=1e-5, name='BatchNorm'):
+    return tf.keras.layers.BatchNormalization(momentum=momentum, epsilon=epsilon,
+                                              center=True, scale=True,
+                                              name=name)
 
-    def call(self, x, training=None, mask=None):
-        x = tf.keras.layers.BatchNormalization(momentum=self.momentum, epsilon=self.epsilon,
-                                               center=True, scale=True,
-                                               name=self.name)(x, training=training)
-        return x
+def InstanceNorm(epsilon=1e-5, name='InstanceNorm'):
+    return tfa.layers.normalizations.InstanceNormalization(epsilon=epsilon, scale=True, center=True,
+                                                           name=name)
 
+def LayerNorm(epsilon=1e-3, name='LayerNorm'):
+    return tf.keras.layers.LayerNormalization(epsilon=epsilon, center=True, scale=True,
+                                              name=name)
 
-class InstanceNorm(tf.keras.layers.Layer):
-    def __init__(self, epsilon=1e-5, name='InstanceNorm'):
-        super(InstanceNorm, self).__init__(name=name)
-        self.epsilon = epsilon
-
-    def call(self, x, training=None, mask=None):
-        x = tfa.layers.normalizations.InstanceNormalization(epsilon=self.epsilon, scale=True, center=True,
-                                                            name=self.name)(x)
-
-        return x
-
-
-class LayerNorm(tf.keras.layers.Layer):
-    def __init__(self, epsilon=1e-3, name='LayerNorm'):
-        super(LayerNorm, self).__init__(name=name)
-        self.epsilon = epsilon
-
-    def call(self, x, training=None, mask=None):
-        x = tf.keras.layers.LayerNormalization(epsilon=self.epsilon, center=True, scale=True, name=self.name)(x)
-        return x
-
-
-class GroupNorm(tf.keras.layers.Layer):
-    def __init__(self, groups=32, epsilon=1e-5, name='GroupNorm'):
-        super(GroupNorm, self).__init__(name=name)
-        self.groups = groups
-        self.epsilon = epsilon
-
-    def call(self, x, training=None, mask=None):
-        x = tfa.layers.normalizations.GroupNormalization(groups=self.groups, epsilon=self.epsilon, scale=True,
-                                                         center=True, name=self.name)(x)
-
-        return x
+def GroupNorm(groups=32, epsilon=1e-5, name='GroupNorm'):
+    return tfa.layers.normalizations.GroupNormalization(groups=groups, epsilon=epsilon, scale=True, center=True,
+                                                        name=name)
 
 
 class AdaptiveInstanceNorm(tf.keras.layers.Layer):
