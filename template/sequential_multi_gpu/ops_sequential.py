@@ -8,44 +8,8 @@ from utils import pytorch_xavier_weight_factor, pytorch_kaiming_weight_factor
 # Initialization
 ##################################################################################
 
-"""
-
-pytorch xavier (gain)
-https://pytorch.org/docs/stable/_modules/torch/nn/init.html
-
-USE < tf.contrib.layers.variance_scaling_initializer() >
-if uniform :
-    factor = gain * gain
-    mode = 'FAN_AVG'
-else :
-    factor = (gain * gain) / 1.3
-    mode = 'FAN_AVG'
-
-pytorch : trunc_stddev = gain * sqrt(2 / (fan_in + fan_out))
-tensorflow  : trunc_stddev = sqrt(1.3 * factor * 2 / (fan_in + fan_out))
-
-"""
-
-"""
-pytorch kaiming (a=0)
-https://pytorch.org/docs/stable/_modules/torch/nn/init.html
-
-if uniform :
-    a = 0 -> gain = sqrt(2)
-    factor = gain * gain
-    mode='FAN_IN'
-else :
-    a = 0 -> gain = sqrt(2)
-    factor = (gain * gain) / 1.3
-    mode = 'FAN_OUT', # FAN_OUT is correct, but more use 'FAN_IN
-
-pytorch : trunc_stddev = gain * sqrt(2 / fan_in)
-tensorflow  : trunc_stddev = sqrt(1.3 * factor * 2 / fan_in)
-
-"""
-
 # Xavier : tf.initializers.GlorotUniform() or tf.initializers.GlorotNormal()
-# He : tf.initializers.VarianceScaling()
+# He : tf.initializers.he_normal() or tf.initializers.he_uniform()
 # Normal : tf.initializers.RandomNormal(mean=0.0, stddev=0.02)
 # Truncated_normal : tf.initializers.TruncatedNormal(mean=0.0, stddev=0.02)
 # Orthogonal : tf.initializers.Orthogonal0.02)
@@ -57,8 +21,10 @@ tensorflow  : trunc_stddev = sqrt(1.3 * factor * 2 / fan_in)
 # l2_decay : tf.keras.regularizers.l2(0.0001)
 # orthogonal_regularizer : orthogonal_regularizer(0.0001) # orthogonal_regularizer_fully(0.0001)
 
-# factor, mode, uniform = pytorch_xavier_weight_factor(gain=0.02, uniform=False)
-# weight_initializer = tf.initializers.VarianceScaling(scale=factor, mode=mode, uniform=uniform)
+# factor, mode = pytorch_xavier_weight_factor(gain=0.02, uniform=False)
+# distribution = "untruncated_normal"
+# distribution in {"uniform", "truncated_normal", "untruncated_normal"}
+# weight_initializer = tf.initializers.VarianceScaling(scale=factor, mode=mode, distribution=distribution)
 
 weight_initializer = tf.initializers.RandomNormal(mean=0.0, stddev=0.02)
 weight_regularizer = tf.keras.regularizers.l2(0.0001)
@@ -299,7 +265,7 @@ class FullyConnected(tf.keras.layers.Layer):
                                             use_bias=self.use_bias, name=self.name)
 
     def call(self, x, training=None, mask=None):
-        x = flatten()(x)
+        x = Flatten(x)
         x = self.fc(x)
 
         return x

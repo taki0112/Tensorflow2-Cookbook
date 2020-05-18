@@ -109,18 +109,14 @@ def check_folder(log_dir):
 def str2bool(x):
     return x.lower() in ('true')
 
-def pytorch_xavier_weight_factor(gain=0.02, uniform=False) :
+def pytorch_xavier_weight_factor(gain=0.02) :
 
-    if uniform :
-        factor = gain * gain
-        mode = 'FAN_AVG'
-    else :
-        factor = (gain * gain) / 1.3
-        mode = 'FAN_AVG'
+    factor = gain * gain
+    mode = 'fan_avg'
 
-    return factor, mode, uniform
+    return factor, mode
 
-def pytorch_kaiming_weight_factor(a=0.0, activation_function='relu', uniform=False) :
+def pytorch_kaiming_weight_factor(a=0.0, activation_function='relu') :
 
     if activation_function == 'relu' :
         gain = np.sqrt(2.0)
@@ -131,14 +127,10 @@ def pytorch_kaiming_weight_factor(a=0.0, activation_function='relu', uniform=Fal
     else :
         gain = 1.0
 
-    if uniform :
-        factor = gain * gain
-        mode = 'FAN_IN'
-    else :
-        factor = (gain * gain) / 1.3
-        mode = 'FAN_IN'
+    factor = gain * gain
+    mode = 'fan_in'
 
-    return factor, mode, uniform
+    return factor, mode
 
 def automatic_gpu_usage() :
     gpus = tf.config.experimental.list_physical_devices('GPU')
