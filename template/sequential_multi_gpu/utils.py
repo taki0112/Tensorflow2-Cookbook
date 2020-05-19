@@ -22,7 +22,7 @@ class Image_data:
         x = tf.io.read_file(filename)
         x_decode = tf.image.decode_jpeg(x, channels=self.channels, dct_method='INTEGER_ACCURATE')
         img = tf.image.resize(x_decode, [self.img_height, self.img_width])
-        img = tf.cast(img, tf.float32) / 127.5 - 1
+        img = preprocess_fit_train_image(img)
 
         if self.augment_flag :
             augment_height_size = self.img_height + (30 if self.img_height == 256 else int(self.img_height * 0.1))
@@ -62,6 +62,31 @@ def load_test_image(image_path, img_width, img_height, img_channel):
     img = img/127.5 - 1
 
     return img
+
+def load_images(image_path, img_hegiht, img_width, img_channel):
+    x = tf.io.read_file(image_path)
+    x_decode = tf.image.decode_jpeg(x, channels=img_channel, dct_method='INTEGER_ACCURATE')
+    img = tf.image.resize(x_decode, [img_hegiht, img_width])
+    img = preprocess_fit_train_image(img)
+
+    return img
+
+def adjust_dynamic_range(images, range_in, range_out, out_dtype):
+    scale = (range_out[1] - range_out[0]) / (range_in[1] - range_in[0])
+    bias = range_out[0] - range_in[0] * scale
+    images = images * scale + bias
+    images = tf.clip_by_value(images, range_out[0], range_out[1])
+    images = tf.cast(images, dtype=out_dtype)
+    return images
+
+def preprocess_fit_train_image(images):
+    images = adjust_dynamic_range(images, range_in=(0.0, 255.0), range_out=(-1.0, 1.0), out_dtype=tf.dtypes.float32)
+    return images
+
+def postprocess_images(images):
+    images = adjust_dynamic_range(images, range_in=(-1.0, 1.0), range_out=(0.0, 255.0), out_dtype=tf.dtypes.float32)
+    images = tf.cast(images, dtype=tf.dtypes.uint8)
+    return images
 
 def augmentation(image, augment_height, augment_width, seed):
     ori_image_shape = tf.shape(image)
@@ -159,3 +184,11 @@ def multiple_gpu_usage():
         except RuntimeError as e:
             # Virtual devices must be set before GPUs have been initialized
             print(e)
+
+def moving_average(model, model_test, beta=0.999):
+    for param, param_test in zip(model.trainable_weights, model_test.trainable_weights):
+        param_test.assign(lerp(param, param_test, beta))
+
+def lerp(a, b, t):
+    out = a + (b - a) * t
+    return out
